@@ -7,14 +7,21 @@ import argparse
 
 def send_data(interval):
     while True:
-        data = {
-            "timestamp": int(time.time()),
-            "message": {
-                "id": "value",
-                "value": ''.join(random.choices(
+        id = ''.join(random.choices(
                     "abcdefghijklmnopqrstuvwxyz0123456789",
                     k=random.randint(1, 20)))
-            }
+        temperatura = random.uniform(10, 30)
+        temperatura = round(temperatura, 1)
+        
+        humedad = random.randint(0, 100)
+
+        
+        data = {
+            "timestamp": int(time.time()),
+            "id": id,
+            "temperatura":temperatura,
+            "porcentaje_humedad":humedad,
+            
         }
         print("ThreadID: ", threading.get_ident(), json.dumps(data))
         time.sleep(interval)
