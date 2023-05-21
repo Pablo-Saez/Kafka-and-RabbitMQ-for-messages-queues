@@ -5,15 +5,23 @@ import random
 import argparse
 
 import pika
+from pika import credentials
+
+# Establecer la conexión con RabbitMQ
+credentials = pika.PlainCredentials('user', 'bitnami')
+parameters = pika.ConnectionParameters('localhost', credentials=credentials)
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
+
+# Crear una cola en RabbitMQ
+channel.queue_declare(queue='mi_cola')
+print("a continuacion va el canal")
+print(channel)
+
+# Crear un bloqueo para sincronizar el acceso al canal
+channel_lock = threading.Lock()
 
 def send_data(interval):
-    # Establecer la conexión con RabbitMQ
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-    channel = connection.channel()
-
-    # Crear una cola en RabbitMQ
-    channel.queue_declare(queue='mi_cola')
-
     while True:
         id = ''.join(random.choices(
             "abcdefghijklmnopqrstuvwxyz0123456789",
@@ -28,19 +36,22 @@ def send_data(interval):
             "id": id,
             "temperatura": temperatura,
             "porcentaje_humedad": humedad,
-            "thread_ID":threading.get_ident()
+            "thread_ID": threading.get_ident()
         }
         message = json.dumps(data)
 
-        # Enviar el mensaje a la cola
-        channel.basic_publish(exchange='', routing_key='mi_cola', body=message)
+        # Adquirir el bloqueo antes de utilizar el canal
+        channel_lock.acquire()
+        try:
+            # Enviar el mensaje a la cola
+            channel.basic_publish(exchange='', routing_key='mi_cola', body=message)
 
-        print("ThreadID:", threading.get_ident(), message)
+            print("ThreadID:", threading.get_ident(), message)
+        finally:
+            # Liberar el bloqueo después de utilizar el canal
+            channel_lock.release()
+
         time.sleep(interval)
-
-    # Cerrar la conexión
-    connection.close()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -58,3 +69,6 @@ if __name__ == "__main__":
     # Esperar a que todos los threads finalicen
     for thread in threads:
         thread.join()
+
+# Cerrar la conexión
+connection.close()

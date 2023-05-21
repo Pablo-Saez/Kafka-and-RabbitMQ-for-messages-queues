@@ -1,11 +1,16 @@
 import pika
+from pika import credentials
 
 # Callback para procesar los mensajes recibidos
 def callback(ch, method, properties, body):
     print("Mensaje recibido: %r" % body)
 
+# Establecer las credenciales de acceso
+credentials = credentials.PlainCredentials('user', 'bitnami')
+
 # Establecer la conexión con RabbitMQ
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+parameters = pika.ConnectionParameters('localhost', credentials=credentials)
+connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 # Crear una cola en RabbitMQ
