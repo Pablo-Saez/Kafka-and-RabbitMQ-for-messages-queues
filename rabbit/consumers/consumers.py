@@ -6,10 +6,10 @@ def callback(ch, method, properties, body):
     print("Mensaje recibido: %r" % body)
 
 # Establecer las credenciales de acceso
-credentials = credentials.PlainCredentials('user', 'bitnami')
+credentials = credentials.PlainCredentials('myuser', 'mypassword')
 
 # Establecer la conexión con RabbitMQ
-parameters = pika.ConnectionParameters('localhost', credentials=credentials)
+parameters = pika.ConnectionParameters('localhost', port=5673, credentials=credentials)
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 

@@ -8,7 +8,7 @@ import pika
 from pika import credentials
 
 # Establecer la conexión con RabbitMQ
-credentials = pika.PlainCredentials('user', 'bitnami')
+credentials = pika.PlainCredentials('myuser', 'mypassword')
 parameters = pika.ConnectionParameters('localhost', credentials=credentials)
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()

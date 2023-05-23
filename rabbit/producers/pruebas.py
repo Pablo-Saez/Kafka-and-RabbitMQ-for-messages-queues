@@ -5,18 +5,17 @@ import random
 import argparse
 
 import pika
-from pika import credentials
 
 # Establecer la conexión con RabbitMQ
-credentials = pika.PlainCredentials('user', 'bitnami')
-parameters = pika.ConnectionParameters('localhost', credentials=credentials)
+credentials = pika.PlainCredentials('myuser', 'mypassword')
+parameters = pika.ConnectionParameters('localhost', port=5673, credentials=credentials)
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 # Crear una cola en RabbitMQ
 channel.queue_declare(queue='mi_cola')
-print("a continuacion va el canal")
-print(channel)
+# print("A continuación va el canal:")
+# print(channel)
 
 # Crear un bloqueo para sincronizar el acceso al canal
 channel_lock = threading.Lock()

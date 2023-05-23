@@ -1,0 +1,40 @@
+version: "3.5"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5673:5672
+      - 15673:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
+    networks:
+      - rabbitmq_python
+
+  producer:
+    build: ./producers
+    restart: always
+    container_name: producer
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+
+  consumer:
+    build: ./consumers
+    restart: always
+    container_name: consumer
+    depends_on:
+      - rabbitmq
+      - producer
+    networks:
+      - rabbitmq_python
+
+networks:
+  rabbitmq_python:
+    driver: bridge
