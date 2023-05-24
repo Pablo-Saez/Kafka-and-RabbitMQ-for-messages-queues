@@ -127,8 +127,28 @@ services:
       - rabbitmq_python
     volumes:
       - ./consumers/consumers_color:/usr/src/app
+  producer_peso:
+    build: ./producers/producers_peso
 
+    container_name: producer_peso_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./producers/producers_peso:/usr/src/app
+  consumer_peso:
+    build: ./consumers/consumers_peso
 
+    # container_name: consumer_peso_rabbit
+    deploy: 
+      replicas: 2
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./consumers/consumers_peso:/usr/src/app
 
 networks:
   rabbitmq_python:
