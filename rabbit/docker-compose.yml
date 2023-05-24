@@ -52,7 +52,9 @@ services:
   consumer_temperatura:
     build: ./consumers/consumers_temperatura
 
-    container_name: consumer_temperatura_rabbit
+    #container_name: consumer_temperatura_rabbit
+    deploy: 
+      replicas: 2
     depends_on:
       - rabbitmq
     networks:
@@ -72,7 +74,9 @@ services:
   consumer_humedad:
     build: ./consumers/consumers_humedad
 
-    container_name: consumer_humedad_rabbit
+    # container_name: consumer_humedad_rabbit
+    deploy: 
+      replicas: 2
     depends_on:
       - rabbitmq
     networks:
@@ -92,7 +96,9 @@ services:
   consumer_posicion:
     build: ./consumers/consumers_posicion
 
-    container_name: consumer_posicion_rabbit
+    # container_name: consumer_posicion_rabbit
+    deploy: 
+      replicas: 2
     depends_on:
       - rabbitmq
     networks:
@@ -112,7 +118,9 @@ services:
   consumer_color:
     build: ./consumers/consumers_color
 
-    container_name: consumer_color_rabbit
+    # container_name: consumer_color_rabbit
+    deploy: 
+      replicas: 2
     depends_on:
       - rabbitmq
     networks:
