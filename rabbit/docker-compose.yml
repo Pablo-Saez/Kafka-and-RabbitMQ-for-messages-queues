@@ -29,7 +29,9 @@ services:
   consumer:
     build: ./consumers
     
-    container_name: consumer_rabbit
+    #container_name: consumer_rabbit
+    deploy: 
+      replicas: 2
     depends_on:
       - rabbitmq
       - producer
@@ -37,6 +39,88 @@ services:
       - rabbitmq_python
     volumes:
       - ./consumers:/usr/src/app
+  producer_temperatura:
+    build: ./producers/producers_temperatura
+
+    container_name: producer_temperatura_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./producers/producers_temperatura:/usr/src/app
+  consumer_temperatura:
+    build: ./consumers/consumers_temperatura
+
+    container_name: consumer_temperatura_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./consumers/consumers_temperatura:/usr/src/app
+  producer_humedad:
+    build: ./producers/producers_humedad
+
+    container_name: producer_humedad_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./producers/producers_humedad:/usr/src/app  
+  consumer_humedad:
+    build: ./consumers/consumers_humedad
+
+    container_name: consumer_humedad_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./consumers/consumers_humedad:/usr/src/app
+  producer_posicion:
+    build: ./producers/producers_posicion
+
+    container_name: producer_posicion_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./producers/producers_posicion:/usr/src/app 
+  consumer_posicion:
+    build: ./consumers/consumers_posicion
+
+    container_name: consumer_posicion_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./consumers/consumers_posicion:/usr/src/app
+  producer_color:
+    build: ./producers/producers_color
+
+    container_name: producer_color_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./producers/producers_color:/usr/src/app
+  consumer_color:
+    build: ./consumers/consumers_color
+
+    container_name: consumer_color_rabbit
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_python
+    volumes:
+      - ./consumers/consumers_color:/usr/src/app
+
+
 
 networks:
   rabbitmq_python:

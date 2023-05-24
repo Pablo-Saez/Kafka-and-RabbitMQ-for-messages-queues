@@ -4,3 +4,8 @@
 
 -->compose de kafka: sudo docker-compose up kafka
 ----->dependencias: pip install kafka-python
+
+sudo docker-compose down -v
+sudo docker system prune -a
+
+sudo docker exec -it producer_rabbit bash

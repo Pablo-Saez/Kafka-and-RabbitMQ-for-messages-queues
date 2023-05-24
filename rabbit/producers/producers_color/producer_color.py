@@ -5,7 +5,6 @@ import random
 import argparse
 
 import pika
-#ESTE ARCHIVO ES GENERICO Y MANDA LOS 5 ELEMENTOS.
 
 # Establecer la conexión con RabbitMQ
 credentials = pika.PlainCredentials('myuser', 'mypassword')
@@ -13,10 +12,8 @@ parameters = pika.ConnectionParameters('rabbitmq', port=5672, credentials=creden
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
-# Crear una cola en RabbitMQ
-channel.queue_declare(queue='mi_cola')
-# print("A continuación va el canal:")
-# print(channel)
+# Crear un canal exclusivo llamado "color"
+channel.queue_declare(queue='color')
 
 # Crear un bloqueo para sincronizar el acceso al canal
 channel_lock = threading.Lock()
@@ -26,33 +23,22 @@ def send_data(interval):
         id = ''.join(random.choices(
             "abcdefghijklmnopqrstuvwxyz0123456789",
             k=random.randint(1, 20)))
-        temperatura = random.uniform(10, 30)
-        temperatura = round(temperatura, 1)
-
-        humedad = random.randint(0, 100)
-        posicion = random.randint(0, 10)
-
         colores = ["blanco", "rojo", "azul", "naranjo", "amarillo", "verde_claro", "verde_oscuro", "lila", "blanco"]
 
         color = random.choice(colores)
-        peso = random.randint(0.1,30)
+
         data = {
             "timestamp": int(time.time()),
             "id": id,
-            "temperatura": temperatura,
-            "porcentaje_humedad": humedad,
-            "thread_ID": threading.get_ident(),
-            "posicion": posicion,
-            "color": color,
-            "peso":peso
+            "color":color
         }
         message = json.dumps(data)
 
         # Adquirir el bloqueo antes de utilizar el canal
         channel_lock.acquire()
         try:
-            # Enviar el mensaje a la cola
-            channel.basic_publish(exchange='', routing_key='mi_cola', body=message)
+            # Enviar el mensaje al canal "color"
+            channel.basic_publish(exchange='', routing_key='color', body=message)
 
             print("ThreadID:", threading.get_ident(), message)
         finally:
