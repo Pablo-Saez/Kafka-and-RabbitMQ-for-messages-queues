@@ -1,6 +1,6 @@
-Se tendrá un invernadero con plantas separadas por posicion, siendo las posiciones del 0 al 100.
-Cada posicion esta asociado a una planta la cual tiene que tener un cierto porcentaje de humedad,
-temperatura, y luminozidad
 
-Se creo el archivo .yml para rabbit con bridge
-tambien se instalo pika con pip: pip install pika.
+
+--> compose de rabbit: sudo docker-compose up rabbitmq
+
+-->compose de kafka: sudo docker-compose up kafka
+----->dependencias: pip install kafka-python

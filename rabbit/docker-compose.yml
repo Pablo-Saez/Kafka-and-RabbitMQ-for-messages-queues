@@ -18,22 +18,25 @@ services:
 
   producer:
     build: ./producers
-    restart: always
-    container_name: producer
+    
+    container_name: producer_rabbit
     depends_on:
       - rabbitmq
     networks:
       - rabbitmq_python
-
+    volumes:
+      - ./producers:/usr/src/app
   consumer:
     build: ./consumers
-    restart: always
-    container_name: consumer
+    
+    container_name: consumer_rabbit
     depends_on:
       - rabbitmq
       - producer
     networks:
       - rabbitmq_python
+    volumes:
+      - ./consumers:/usr/src/app
 
 networks:
   rabbitmq_python:

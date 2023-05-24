@@ -3,24 +3,21 @@ import time
 import json
 import random
 import argparse
+#pip install confluent-kafka
+from confluent_kafka import Producer
+from kafka import KafkaProducer
 
-import pika
+# Configuración de Kafka
+bootstrap_servers = 'kafka:9092'
+topic = 'mi_topic'
 
-# Establecer la conexión con RabbitMQ
-credentials = pika.PlainCredentials('myuser', 'mypassword')
-parameters = pika.ConnectionParameters('rabbitmq', port=5672, credentials=credentials)
-connection = pika.BlockingConnection(parameters)
-channel = connection.channel()
-
-# Crear una cola en RabbitMQ
-channel.queue_declare(queue='mi_cola')
-# print("A continuación va el canal:")
-# print(channel)
-
-# Crear un bloqueo para sincronizar el acceso al canal
-channel_lock = threading.Lock()
+# Crear un bloqueo para sincronizar el acceso al productor de Kafka
+producer_lock = threading.Lock()
 
 def send_data(interval):
+    # Crear instancia del productor de Kafka
+    producer = KafkaProducer(bootstrap_servers=[bootstrap_servers])
+
     while True:
         id = ''.join(random.choices(
             "abcdefghijklmnopqrstuvwxyz0123456789",
@@ -30,25 +27,35 @@ def send_data(interval):
 
         humedad = random.randint(0, 100)
 
+        posicion = random.randint(0, 10)
+
+        colores = ["blanco", "rojo", "azul", "naranjo", "amarillo", "verde_claro", "verde_oscuro", "lila", "blanco"]
+
+        color = random.choice(colores)
+
         data = {
             "timestamp": int(time.time()),
             "id": id,
             "temperatura": temperatura,
             "porcentaje_humedad": humedad,
-            "thread_ID": threading.get_ident()
+            "thread_ID": threading.get_ident(),
+            "posicion": posicion,
+            "color": color
         }
         message = json.dumps(data)
 
-        # Adquirir el bloqueo antes de utilizar el canal
-        channel_lock.acquire()
+        # Adquirir el bloqueo antes de utilizar el productor de Kafka
+        producer_lock.acquire()
         try:
-            # Enviar el mensaje a la cola
-            channel.basic_publish(exchange='', routing_key='mi_cola', body=message)
+            # Enviar el mensaje al tema de Kafka
+            print("entro")
+            producer.send(topic, message.encode('utf-8'))
+            producer.flush()
 
             print("ThreadID:", threading.get_ident(), message)
         finally:
-            # Liberar el bloqueo después de utilizar el canal
-            channel_lock.release()
+            # Liberar el bloqueo después de utilizar el productor de Kafka
+            producer_lock.release()
 
         time.sleep(interval)
 
@@ -65,9 +72,6 @@ if __name__ == "__main__":
         t.start()
         threads.append(t)
 
-    # Esperar a que todos los threads finalicen
+    # Esperar a que todos los hilos finalicen
     for thread in threads:
         thread.join()
-
-# Cerrar la conexión
-connection.close()
