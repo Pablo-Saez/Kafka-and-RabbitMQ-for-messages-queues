@@ -1,8 +1,11 @@
 from kafka import KafkaConsumer
+import random
 
 
 servidores_bootstrap = 'kafka:9092'
-topic = 'color'
+topics = ['temperatura', 'porcentaje_humedad', 'posicion', 'color', 'peso']
+topic = random.choice(topics)
+print("El topic elegido es: "+ topic)
 
 consumidor = KafkaConsumer(topic, bootstrap_servers=[servidores_bootstrap])
 
