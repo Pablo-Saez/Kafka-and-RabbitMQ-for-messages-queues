@@ -1,77 +1,114 @@
-import threading
-import time
-import json
-import random
-import argparse
-#pip install confluent-kafka
-from confluent_kafka import Producer
 from kafka import KafkaProducer
+from json import dumps
+import time
+import threading
+import argparse
+import random
+import string
 
-# Configuración de Kafka
-bootstrap_servers = 'kafka:9092'
-topic = 'mi_topic'
+servidores_bootstrap = 'kafka:9092'
+topic_temperatura = 'temperatura'
+topic_humedad = 'porcentaje_humedad'
+topic_posicion = 'posicion'
+topic_color = 'color'
+topic_peso = 'peso'
 
-# Crear un bloqueo para sincronizar el acceso al productor de Kafka
-producer_lock = threading.Lock()
+productor = KafkaProducer(bootstrap_servers=[servidores_bootstrap])
 
-def send_data(interval):
-    # Crear instancia del productor de Kafka
-    producer = KafkaProducer(bootstrap_servers=[bootstrap_servers])
+def generar_id():
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=random.randint(1, 20)))
 
+def enviar_temperatura():
+    topic = topic_temperatura
     while True:
-        id = ''.join(random.choices(
-            "abcdefghijklmnopqrstuvwxyz0123456789",
-            k=random.randint(1, 20)))
-        temperatura = random.uniform(10, 30)
-        temperatura = round(temperatura, 1)
-
-        humedad = random.randint(0, 100)
-
-        posicion = random.randint(0, 10)
-
-        colores = ["blanco", "rojo", "azul", "naranjo", "amarillo", "verde_claro", "verde_oscuro", "lila", "blanco"]
-
-        color = random.choice(colores)
-
-        data = {
+        temperatura = round(random.uniform(10, 30), 1)
+        mensaje = {
             "timestamp": int(time.time()),
-            "id": id,
-            "temperatura": temperatura,
-            "porcentaje_humedad": humedad,
-            "thread_ID": threading.get_ident(),
-            "posicion": posicion,
+            "id": generar_id(),
+            "temperatura": temperatura
+        }
+        json_mensaje = dumps(mensaje).encode('utf-8')
+        productor.send(topic, json_mensaje)
+        print('Enviando JSON:', json_mensaje)
+        time.sleep(3)
+
+def enviar_porcentaje_humedad():
+    topic = topic_humedad
+    while True:
+        humedad = random.randint(0, 100)
+        mensaje = {
+            "timestamp": int(time.time()),
+            "id": generar_id(),
+            "porcentaje_humedad": humedad
+        }
+        json_mensaje = dumps(mensaje).encode('utf-8')
+        productor.send(topic, json_mensaje)
+        print('Enviando JSON:', json_mensaje)
+        time.sleep(3)
+
+def enviar_posicion():
+    topic = topic_posicion
+    while True:
+        posicion = random.randint(0, 10)
+        mensaje = {
+            "timestamp": int(time.time()),
+            "id": generar_id(),
+            "posicion": posicion
+        }
+        json_mensaje = dumps(mensaje).encode('utf-8')
+        productor.send(topic, json_mensaje)
+        print('Enviando JSON:', json_mensaje)
+        time.sleep(3)
+
+def enviar_color():
+    topic = topic_color
+    while True:
+        colores = ["blanco", "rojo", "azul", "naranjo", "amarillo", "verde_claro", "verde_oscuro", "lila", "blanco"]
+        color = random.choice(colores)
+        mensaje = {
+            "timestamp": int(time.time()),
+            "id": generar_id(),
             "color": color
         }
-        message = json.dumps(data)
+        json_mensaje = dumps(mensaje).encode('utf-8')
+        productor.send(topic, json_mensaje)
+        print('Enviando JSON:', json_mensaje)
+        time.sleep(3)
 
-        # Adquirir el bloqueo antes de utilizar el productor de Kafka
-        producer_lock.acquire()
-        try:
-            # Enviar el mensaje al tema de Kafka
-            print("entro")
-            producer.send(topic, message.encode('utf-8'))
-            producer.flush()
-
-            print("ThreadID:", threading.get_ident(), message)
-        finally:
-            # Liberar el bloqueo después de utilizar el productor de Kafka
-            producer_lock.release()
-
-        time.sleep(interval)
+def enviar_peso():
+    topic = topic_peso
+    while True:
+        peso = round(random.uniform(0, 100), 2)
+        mensaje = {
+            "timestamp": int(time.time()),
+            "id": generar_id(),
+            "peso": peso
+        }
+        json_mensaje = dumps(mensaje).encode('utf-8')
+        productor.send(topic, json_mensaje)
+        print('Enviando JSON:', json_mensaje)
+        time.sleep(3)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("num_threads", type=int, help="Number of threads to create")
+    parser.add_argument("num_threads", type=int, help="Número de hilos a crear")
     args = parser.parse_args()
 
+    funciones_envio = [
+        enviar_temperatura,
+        enviar_porcentaje_humedad,
+        enviar_posicion,
+        enviar_color,
+        enviar_peso
+    ]
+
     threads = []
-    for i in range(args.num_threads):
-        interval = random.uniform(1, 5) # intervalo aleatorio
-        t = threading.Thread(target=send_data, args=(interval,))
-        t.daemon = True
+    for _ in range(args.num_threads):
+        funcion_envio = random.choice(funciones_envio)
+        t = threading.Thread(target=funcion_envio)
         t.start()
         threads.append(t)
 
     # Esperar a que todos los hilos finalicen
-    for thread in threads:
-        thread.join()
+    for t in threads:
+        t.join()

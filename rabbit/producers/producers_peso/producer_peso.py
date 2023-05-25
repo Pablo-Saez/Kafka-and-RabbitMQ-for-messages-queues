@@ -23,7 +23,7 @@ def send_data(interval):
         id = ''.join(random.choices(
             "abcdefghijklmnopqrstuvwxyz0123456789",
             k=random.randint(1, 20)))
-        peso = random.randint(0.1, 30)
+        peso = random.randint(1, 30)
 
         data = {
             "timestamp": int(time.time()),

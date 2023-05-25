@@ -1,20 +1,18 @@
 from kafka import KafkaConsumer
 
-# Configuración del consumidor de Kafka
-bootstrap_servers = 'kafka:9092'
-topic = 'mi_topico'
-group_id = 'mi_grupo'
 
-# Crear una instancia del consumidor de Kafka
-consumer = KafkaConsumer(topic, bootstrap_servers=bootstrap_servers)
+servidores_bootstrap = 'kafka:9092'
+topic = 'color'
 
-# Leer y procesar los mensajes del tópico
-for message in consumer:
-    print(f'Mensaje recibido: {message.value.decode()}')
+consumidor = KafkaConsumer(topic, bootstrap_servers=[servidores_bootstrap])
 
-# Cerrar la conexión del consumidor
-print("termino")
-consumer.close()
+for msg in consumidor:
+    print(msg.value)
 
 
 
+
+# from kafka import KafkaConsumer
+# consumer = KafkaConsumer('mi_tema')
+# for message in consumer:
+#     print(message)
